@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Vé số Online (Demo)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🎟️ Vé Số Online (Demo)</h1>
+
+  <div class="header-links">
+    <a href="database.html" class="link-database">� Xem Lịch Sử Mua Vé</a>
+  </div>
+
+  <div class="tickets-container" id="ticketsContainer"></div>
+
+  <!-- Modal Form -->
+  <div id="buyModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Mua Vé Số</h2>
+      <form id="buyForm" onsubmit="submitBuyForm(event)">
+        <div class="form-group">
+          <label for="modalTicketNumber">Số Vé:</label>
+          <input type="text" id="modalTicketNumber" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="modalBuyerName">Tên Người Mua: <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="modalBuyerName" 
+            placeholder="Nhập tên của bạn" 
+            required
+          >
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn-primary">Xác Nhận Mua</button>
+          <button type="button" class="btn-secondary" onclick="closeModal()">Hủy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    *Trang mô phỏng – không giao dịch thật
+  </footer>
+
+  <script>
+    let currentTicketNumber = '';
+    let currentButton = null;
+
+    // Hàm tạo số ngẫu nhiên từ 001 tới 100
+    function generateRandomNumber() {
+      return String(Math.floor(Math.random() * 100) + 1).padStart(3, '0');
+    }
+
+    // Hàm tạo 10 vé số
+    function generateTickets() {
+      const container = document.getElementById('ticketsContainer');
+      for (let i = 0; i < 10; i++) {
+        const ticketNumber = generateRandomNumber();
+        const ticketDiv = document.createElement('div');
+        ticketDiv.className = 'ticket';
+        
+        ticketDiv.innerHTML = `
+          <p class="number">${ticketNumber}</p>
+          <p class="price">Giá: 10.000đ</p>
+          <button type="button" onclick="openBuyModal('${ticketNumber}', this)">Mua vé</button>
+        `;
+        
+        container.appendChild(ticketDiv);
+      }
+    }
+
+    // Mở modal form
+    function openBuyModal(ticketNumber, button) {
+      currentTicketNumber = ticketNumber;
+      currentButton = button;
+      document.getElementById('modalTicketNumber').value = ticketNumber;
+      document.getElementById('modalBuyerName').value = '';
+      document.getElementById('buyModal').style.display = 'block';
+      document.getElementById('modalBuyerName').focus();
+    }
+
+    // Đóng modal
+    function closeModal() {
+      document.getElementById('buyModal').style.display = 'none';
+      currentTicketNumber = '';
+      currentButton = null;
+    }
+
+    // Submit form mua vé
+    function submitBuyForm(event) {
+      event.preventDefault();
+      
+      const buyerName = document.getElementById('modalBuyerName').value.trim();
+      
+      if (buyerName === '') {
+        alert('Vui lòng nhập tên!');
+        return;
+      }
+
+      // Cập nhật nút
+      currentButton.textContent = '✓ Đã mua';
+      currentButton.disabled = true;
+      currentButton.style.background = '#4caf50';
+      
+      // Hiển thị thông tin người mua trên vé
+      const ticketDiv = currentButton.closest('.ticket');
+      const buyerInfo = document.createElement('p');
+      buyerInfo.className = 'buyer-info';
+      buyerInfo.textContent = 'Người mua: ' + buyerName;
+      ticketDiv.insertBefore(buyerInfo, currentButton);
+      
+      // Lưu dữ liệu vào localStorage
+      const buyersData = JSON.parse(localStorage.getItem('buyers')) || [];
+      buyersData.push({
+        ticketNumber: currentTicketNumber,
+        name: buyerName,
+        date: new Date().toISOString()
+      });
+      localStorage.setItem('buyers', JSON.stringify(buyersData));
+      
+      // Đóng modal
+      closeModal();
+      
+      // Hiển thị thông báo
+      alert(`Mua vé số ${currentTicketNumber} thành công!\nTên: ${buyerName}`);
+    }
+
+    // Đóng modal khi click bên ngoài
+    window.onclick = function(event) {
+      const modal = document.getElementById('buyModal');
+      if (event.target == modal) {
+        closeModal();
+      }
+    }
+
+    // Gọi hàm tạo vé khi trang load
+    document.addEventListener('DOMContentLoaded', generateTickets);
+  </script>
+</body>
+</html>

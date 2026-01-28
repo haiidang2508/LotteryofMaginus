@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mua Vé Số - Form Nhập Tên</title>
+  <link rel="stylesheet" href="form-style.css">
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-card">
+      <h1>🎟️ Mua Vé Số</h1>
+      
+      <form id="buyerForm" onsubmit="handleFormSubmit(event)">
+        <div class="form-group">
+          <label for="ticketNumber">Số Vé:</label>
+          <input type="text" id="ticketNumber" readonly placeholder="Số vé sẽ được tạo">
+        </div>
+
+        <div class="form-group">
+          <label for="buyerName">Tên Người Mua: <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="buyerName" 
+            placeholder="Nhập tên đầy đủ của bạn" 
+            required
+            maxlength="50"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Số Điện Thoại:</label>
+          <input 
+            type="tel" 
+            id="phoneNumber" 
+            placeholder="Nhập số điện thoại (không bắt buộc)"
+            maxlength="20"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input 
+            type="email" 
+            id="email" 
+            placeholder="Nhập email của bạn (không bắt buộc)"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="quantity">Số Lượng Vé:</label>
+          <input 
+            type="number" 
+            id="quantity" 
+            value="1" 
+            min="1" 
+            max="10"
+          >
+        </div>
+
+        <div class="ticket-info">
+          <p><strong>Giá: 10.000đ / vé</strong></p>
+          <p id="totalPrice">Tổng: 10.000đ</p>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn-primary">Xác Nhận Mua</button>
+          <button type="reset" class="btn-secondary">Xóa Dữ Liệu</button>
+        </div>
+
+        <a href="index.html" class="btn-back">← Quay Lại</a>
+      </form>
+
+      <div id="successMessage" class="success-message" style="display: none;">
+        <h2>✓ Mua Vé Thành Công!</h2>
+        <p id="successInfo"></p>
+        <button onclick="window.location.href='index.html'" class="btn-primary">Tiếp Tục Mua</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Hàm tạo số vé ngẫu nhiên
+    function generateTicketNumber() {
+      return String(Math.floor(Math.random() * 100) + 1).padStart(3, '0');
+    }
+
+    // Tạo số vé khi load trang
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('ticketNumber').value = generateTicketNumber();
+      updateTotalPrice();
+    });
+
+    // Cập nhật tổng giá tiền
+    function updateTotalPrice() {
+      const quantity = parseInt(document.getElementById('quantity').value) || 1;
+      const total = quantity * 10000;
+      document.getElementById('totalPrice').textContent = 'Tổng: ' + total.toLocaleString('vi-VN') + 'đ';
+    }
+
+    // Lắng nghe thay đổi số lượng
+    document.getElementById('quantity').addEventListener('change', updateTotalPrice);
+
+    // Xử lý submit form
+    function handleFormSubmit(event) {
+      event.preventDefault();
+
+      const buyerName = document.getElementById('buyerName').value.trim();
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const ticketNumber = document.getElementById('ticketNumber').value;
+      const quantity = document.getElementById('quantity').value;
+      const total = quantity * 10000;
+
+      if (buyerName === '') {
+        alert('Vui lòng nhập tên!');
+        return;
+      }
+
+      // Ẩn form và hiển thị thông báo thành công
+      document.getElementById('buyerForm').style.display = 'none';
+      const successMessage = document.getElementById('successMessage');
+      
+      let infoText = `<strong>Thông Tin Vé:</strong><br>`;
+      infoText += `Số Vé: ${ticketNumber}<br>`;
+      infoText += `Người Mua: ${buyerName}<br>`;
+      if (phoneNumber) infoText += `Số Điện Thoại: ${phoneNumber}<br>`;
+      if (email) infoText += `Email: ${email}<br>`;
+      infoText += `Số Lượng: ${quantity} vé<br>`;
+      infoText += `<strong>Tổng Giá: ${total.toLocaleString('vi-VN')}đ</strong>`;
+
+      document.getElementById('successInfo').innerHTML = infoText;
+      successMessage.style.display = 'block';
+
+      // Lưu dữ liệu vào localStorage (optional)
+      localStorage.setItem('lastBuyer', JSON.stringify({
+        name: buyerName,
+        phone: phoneNumber,
+        email: email,
+        ticket: ticketNumber,
+        quantity: quantity,
+        total: total,
+        date: new Date().toLocaleString('vi-VN')
+      }));
+    }
+  </script>
+</body>
+</html>
